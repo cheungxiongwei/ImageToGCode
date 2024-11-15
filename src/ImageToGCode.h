@@ -94,6 +94,7 @@ public:
         std::fstream file;
         file.open(fileName, std::ios_base::out | std::ios_base::trunc);
         if(!file.is_open()) {
+            std::println("can not export gcode");
             return false;
         }
 
@@ -121,7 +122,14 @@ private:
         assert(!((width * resolution < 1.0) || (height * resolution < 1.0)));
 
         // different conversion strategy functions are called here
-        bidirectionOptStrategy();
+
+        switch(scanMode) {
+            case ScanMode::Unidirection: unidirectionOptStrategy(); break;
+            case ScanMode::Bidirection: bidirectionOptStrategy(); break;
+            case ScanMode::Diagonal:  diagonalStrategy(); break;
+            case ScanMode::Spiral: spiralStrategy(); break;
+            case ScanMode::Block: break;
+        }
     }
 
     void internal(cv::Mat &image, auto x /*width*/, auto y /*height*/) {
