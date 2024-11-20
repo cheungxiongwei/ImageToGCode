@@ -132,16 +132,6 @@ private:
         }
     }
 
-    void internal(cv::Mat &image, auto x /*width*/, auto y /*height*/) {
-        auto pixel = image.at<cv::uint8_t>(y, x);
-        if(pixel == 255) {
-            command.emplace_back(G0(x / resolution, y / resolution, std::nullopt));
-        } else {
-            auto power = static_cast<int>((1.0 - static_cast<double>(pixel) / 255.0) * 1000.0);
-            command.emplace_back(G1(x / resolution, y / resolution, power));
-        }
-    }
-
     // 单向扫描
     // One-way scanning
     // 未做任何优化处理，像素和G0、G1一一映射对应。
@@ -445,6 +435,16 @@ private:
         }
     }
 
+    void internal(cv::Mat &image, auto x /*width*/, auto y /*height*/,bool isEven) {
+        auto pixel = image.at<cv::uint8_t>(y, x);
+        if(pixel == 255) {
+            command.emplace_back(G0(isEven ? (x + 1) / resolution : x / resolution, y / resolution, std::nullopt));
+        } else {
+            auto power = static_cast<int>((1.0 - static_cast<double>(pixel) / 255.0) * 1000.0);
+            command.emplace_back(G1(isEven ? (x + 1) / resolution : x / resolution, y / resolution, power));
+        }
+    }
+
     // 双向斜向扫描
     // Bidirectional oblique scanning
     // 优化的方式同 bidirectionStdOptStrategy 函数相似
@@ -458,7 +458,7 @@ private:
                 for(int i = std::min(k, image.rows - 1); i >= 0; --i) {
                     int j = k - i;
                     if(i < image.rows && j < image.cols) {
-                        internal(image, j, i);
+                        internal(image, j, i,true);
                     }
                 }
             } else {
@@ -466,7 +466,7 @@ private:
                 for(int j = std::min(k, image.cols - 1); j >= 0; --j) {
                     int i = k - j;
                     if(i < image.rows && j < image.cols) {
-                        internal(image, j, i);
+                        internal(image, j, i,false);
                     }
                 }
             }
