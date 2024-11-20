@@ -272,11 +272,11 @@ private:
                             if(x - length == 0) {
                                 // 此时需要把奇数行延迟的Y轴移动进行上移操作
                                 if(rightToLeft) {
-                                    command.emplace_back(G0(x / resolution, y / resolution, std::nullopt));
+                                    command.emplace_back(G0((x+1) / resolution, y / resolution, std::nullopt));
                                     rightToLeft = false;
                                 } else {
                                     // 偶数从左到右在起点永远不会向上移动，所以这里不需要 y
-                                    command.emplace_back(G0 {x / resolution, std::nullopt, std::nullopt});
+                                    command.emplace_back(G0 {(x+1) / resolution, std::nullopt, std::nullopt});
                                 }
                                 continue;
                             }
@@ -285,24 +285,24 @@ private:
                             if(x == image.cols - 1) {
                                 // 终点需要向上移动，但这个移动我们放在奇数行处理，所以这里只需要做好标记即可。
                                 leftToRight = true;
-                                command.emplace_back(G0((x - length) / resolution, std::nullopt, std::nullopt));
+                                command.emplace_back(G0(((x+1) - length) / resolution, std::nullopt, std::nullopt));
                                 continue;
                             }
 
                             // 中间段存在连续从左到右方向的G0
                             // 中间段不需要向上移动
-                            command.emplace_back(G0(x / resolution, std::nullopt, std::nullopt));
+                            command.emplace_back(G0((x+1) / resolution, std::nullopt, std::nullopt));
                         } else {
                             // 没有找到连续的G0
                             // 终点唯一的G0,需要向上移动，这里做标记放到奇数行移动。
                             if(x == image.cols - 1) {
                                 leftToRight = true;
                             } else if(x == start) {
-                                command.emplace_back(G0(x / resolution, y / resolution, std::nullopt));
+                                command.emplace_back(G0((x+1) / resolution, y / resolution, std::nullopt));
                                 rightToLeft = false;
                                 continue;
                             }
-                            command.emplace_back(G0(x / resolution, std::nullopt, std::nullopt));
+                            command.emplace_back(G0((x+1) / resolution, std::nullopt, std::nullopt));
                         }
                     } else {
                         // <-----|
@@ -357,7 +357,7 @@ private:
                         // 从左到右
                         if(x == start) {
                             if(rightToLeft) {
-                                command.emplace_back(G0 {x / resolution, y / resolution, power});  // 最大激光功率 S=1000
+                                command.emplace_back(G0 {(x+1) / resolution, y / resolution, power});  // 最大激光功率 S=1000
                                 rightToLeft = false;
                                 continue;
                             }
@@ -365,7 +365,7 @@ private:
                             // 终点需要标记
                             leftToRight = true;
                         }
-                        command.emplace_back(G1 {x / resolution, std::nullopt, power});  // 最大激光功率 S=1000
+                        command.emplace_back(G1 {(x+1) / resolution, std::nullopt, power});  // 最大激光功率 S=1000
                     } else {
                         // 从右到左
                         if(x == start) {
